@@ -1,8 +1,9 @@
-const CACHE_NAME = 'health-card-v1';
+const CACHE_NAME = 'health-card-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json',
+  './apple-touch-icon.png'
 ];
 
 // Установка Service Worker

@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Карта Здоровья">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23FDFBF7' width='180' height='180' rx='40'/><g transform='translate(90, 90) scale(0.8)'><circle cx='0' cy='-8' r='16' fill='%23D4A574'/><ellipse cx='0' cy='8' rx='14' ry='18' fill='%23C8956D'/><circle cx='0' cy='0' r='10' fill='%23E8D5C4'/></g></svg>">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23FDFBF7' width='192' height='192'/><g transform='translate(96, 96) scale(1)'><circle cx='0' cy='-10' r='20' fill='%23D4A574'/><ellipse cx='0' cy='10' rx='18' ry='22' fill='%23C8956D'/><circle cx='0' cy='0' r='12' fill='%23E8D5C4'/></g></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -659,9 +659,38 @@
   }
   
   .print-header { display: none; }
+  #sw-update-banner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: #2D2A26;
+    color: #FDFBF7;
+    padding: 14px 16px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  }
+  #sw-update-banner.show { display: flex; align-items: flex-start; gap: 12px; }
+  #sw-update-banner .banner-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+  #sw-update-banner .banner-text { flex: 1; font-size: 13px; line-height: 1.5; }
+  #sw-update-banner .banner-text b { font-size: 14px; display: block; margin-bottom: 3px; }
+  #sw-update-banner .banner-close {
+    background: none; border: none; color: #FDFBF7; font-size: 20px;
+    cursor: pointer; padding: 0 4px; flex-shrink: 0; opacity: 0.7;
+  }
 </style>
 </head>
 <body>
+
+<div id="sw-update-banner">
+  <span class="banner-icon">🔄</span>
+  <div class="banner-text">
+    <b>Приложение обновлено!</b>
+    Иконка на рабочем столе ведёт на старый адрес. Удалите её и добавьте заново через Safari → Поделиться → «На экран Домой».
+  </div>
+  <button class="banner-close" onclick="document.getElementById('sw-update-banner').classList.remove('show')">✕</button>
+</div>
 
 <div class="header-section">
   <div class="header-top">
@@ -829,7 +858,17 @@ const App = (function() {
     const registerServiceWorker = () => {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('✅ Service Worker'))
+                .then(reg => {
+                    console.log('✅ Service Worker');
+                    reg.addEventListener('updatefound', () => {
+                        const newSW = reg.installing;
+                        newSW.addEventListener('statechange', () => {
+                            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                                document.getElementById('sw-update-banner').classList.add('show');
+                            }
+                        });
+                    });
+                })
                 .catch(err => console.log('SW error:', err));
         }
     };
